@@ -9,16 +9,24 @@ function Rect(x, y, w, h)
 
 Rect.prototype.intersects = function(other)
 {
-    if (this.x <= other.x + other.w && this.x + this.w >= other.x && this.y <= other.y + other.h && this.y + this.h >= other.y) {
-        var xx = this.x < other.x ? other.x : this.x;
-        var yy = this.y < other.y ? other.y : this.y;
+    var x = this.x;
+    var y = this.y;
+    var x2 = x + this.w;
+    var y2 = y + this.h;
+    var ox = other.x;
+    var oy = other.y;
+    var oh = other.h;
+    var ox2 = ox + other.w;
+    var oy2 = oy + other.h;
 
-        return new Rect(xx,
-                        yy,
-                        (this.x + this.w < other.x + other.w ? this.x + this.w : other.x + other.w) - xx,
-                        (this.y + this.h < other.y + other.h ? this.y + this.h : other.y + other.h) - yy);
+    // if (this.x <= other.x + other.w && this.x + this.w >= other.x && this.y <= other.y + other.h && this.y + this.h >= other.y) {
+
+    if (x <= ox2 && x2 >= ox && y <= oy2 && y2 >= oy) {
+        var xx = x < ox ? ox : x;
+        var yy = y < oy ? oy : y;
+
+        return new Rect(xx, yy, (x2 < ox2 ? x2 : ox2) - xx, (y2 < oy2 ? y2 : oy2) - yy);
     }
-    return undefined;
 };
 
 
@@ -45,9 +53,10 @@ Node.prototype.render = function(clip)
     var r = clip.intersects(this.rect);
     if (r) {
         ++ret;
-        var l = this.children ? this.children.length : 0;
+        var c = this.children;
+        var l = c ? c.length : 0;
         for (var i=0; i<l; ++i) {
-            ret += this.children[i].render(r);
+            ret += c[i].render(r);
         }
     }
     return ret;

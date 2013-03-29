@@ -104,19 +104,22 @@ void generate(Node *node, int count, int depth)
     }
 }
 
-int main()
+int main(int argc, char **argv)
 {
     uint64_t start = mono();
     Node root;
     root.rect.w = 1280;
     root.rect.h = 720;
 
+    int count = (argc > 1 ? atoi(argv[1]) : 0);
+    if (!count)
+        count = 5000;
     generate(&root, 10, 4);
     uint64_t elapsed = mono() - start;
     printf("Created %d nodes in %lldms\n", nodeCount, elapsed);
     start = mono();
     int rendered = 0;
-    for (int i=0; i<10000; ++i) {
+    for (int i=0; i<count; ++i) {
         rendered += root.render(root.rect);
     }
     elapsed = mono() - start;
