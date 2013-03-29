@@ -90,7 +90,7 @@ static inline uint64_t mono()
     return (ts.tv_sec * 1000) + (ts.tv_nsec / 1000000);
 }
 
-void generate(Node *node, int count, int depth)
+static void generate(Node *node, int count, int depth)
 {
     for (int i=0; i<count; ++i) {
         Node *n = new Node;
