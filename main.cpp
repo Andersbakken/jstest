@@ -55,7 +55,7 @@ struct Node
         }
     }
 
-    int render(const Rect &clipRect);
+    uint64_t render(const Rect &clipRect);
 
     Node *firstChild, *next;
     Rect rect;
@@ -65,30 +65,20 @@ const int numbers[] = { 100, 400, 230, 120, 141, 400, 20, 1300, 450, 350 };
 int index = 0;
 inline int num()
 {
-    const int ret = numbers[index % (sizeof(numbers) / sizeof(int))];
-    ++index;
-    return ret;
+    return numbers[index++ % (sizeof(numbers) / sizeof(int))];
 }
 
-int Node::render(const Rect &clip)
+uint64_t Node::render(const Rect &clip)
 {
-    int ret = 0;
+    uint64_t ret = 0;
     Rect r;
     if (clip.intersects(rect, &r)) {
-        // printf("Intersecting %d %d %d %d with %d %d %d %d => %d %d %d %d\n",
-        //        clip.x, clip.y, clip.w, clip.h,
-        //        rect.x, rect.y, rect.w, rect.h,
-        //        r.x, r.y, r.w, r.h);
         ++ret;
         Node *n = firstChild;
         while (n) {
             ret += n->render(r);
             n = n->next;
         }
-    // } else {
-    //     printf("Not intersecting %d %d %d %d with %d %d %d %d\n",
-    //            clip.x, clip.y, clip.w, clip.h,
-    //            rect.x, rect.y, rect.w, rect.h);
     }
     return ret;
 }
@@ -123,36 +113,23 @@ void generate(Node *node, int count, int depth)
 
 int main(int argc, char **argv)
 {
-    // {
-    //     Rect r(10, 10, 80, 80);
-    //     Rect r2(90, 90, 100, 100);
-    //     Rect rr;
-    //     if (r.intersects(r2, &rr)) {
-    //         printf("yes %d %d %d %d\n", rr.x, rr.y, rr.w, rr.h);
-    //     } else {
-    //         printf("no\n");
-    //     }
-    //     // return 0;
-    // }
     uint64_t start = mono();
     Node root;
     root.rect.w = 1280;
     root.rect.h = 720;
 
-    int count = (argc > 1 ? atoi(argv[1]) : 0);
-    if (!count)
-        count = 5000;
+    const int count = std::max(1, (argc > 1 ? atoi(argv[1]) : 1));
     generate(&root, 10, 4);
     // root.dump();
     uint64_t elapsed = mono() - start;
-    printf("Created %d nodes in %lldms\n", nodeCount, elapsed);
+    printf("Created %d nodes in %llums\n", nodeCount, elapsed);
     start = mono();
-    int rendered = 0;
+    uint64_t rendered = 0;
     for (int i=0; i<count; ++i) {
         rendered += root.render(root.rect);
     }
     elapsed = mono() - start;
-    printf("Rendered %d nodes in %lldms\n", rendered, elapsed);
+    printf("Rendered %llu nodes in %llums (%d iteration%s)\n", rendered, elapsed, count, count > 1 ? "s" : "");
 
     return 0;
 }

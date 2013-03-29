@@ -1,4 +1,3 @@
-
 function Rect(x, y, w, h)
 {
     this.x = x;
@@ -7,31 +6,31 @@ function Rect(x, y, w, h)
     this.h = h;
 }
 
-function intersects(l, r)
+Rect.prototype.intersects = function(other)
 {
-    var x = l[0];
-    var y = l[1];
-    var x2 = x + l[2];
-    var y2 = y + l[3];
-    var ox = r[0];
-    var oy = r[1];
-    var ox2 = ox + r[2];
-    var oy2 = oy + r[3];
+    var x = this.x;
+    var y = this.y;
+    var x2 = x + this.w;
+    var y2 = y + this.h;
+    var ox = other.x;
+    var oy = other.y;
+    var oh = other.h;
+    var ox2 = ox + other.w;
+    var oy2 = oy + other.h;
 
     if (x <= ox2 && x2 >= ox && y <= oy2 && y2 >= oy) {
         var xx = x < ox ? ox : x;
         var yy = y < oy ? oy : y;
 
-        return [xx, yy, (x2 < ox2 ? x2 : ox2) - xx, (y2 < oy2 ? y2 : oy2) - yy];
+        return new Rect(xx, yy, (x2 < ox2 ? x2 : ox2) - xx, (y2 < oy2 ? y2 : oy2) - yy);
     }
-}
-
+};
 
 var nodeCount = 0;
 
 function Node(x, y, w, h)
 {
-    this.rect = [x, y, w, h];
+    this.rect = new Rect(x, y, w, h);
     ++nodeCount;
 }
 
@@ -47,7 +46,7 @@ Node.prototype.addChild = function(child)
 Node.prototype.render = function(clip)
 {
     var ret = 0;
-    var r = intersects(this.rect, clip);
+    var r = clip.intersects(this.rect);
     if (r) {
         ++ret;
         var c = this.children;
@@ -82,15 +81,10 @@ function generate(parent, count, depth)
     }
 }
 
-var root;
-
 function run(count)
 {
-    // debugger;
-    nodeCount = 0;
-    index = 0;
     var start = mono();
-    root = new Node(0, 0, 1280, 720);
+    var root = new Node(0, 0, 1280, 720);
     generate(root, 10, 4);
     var elapsed = mono() - start;
     console.log("Created " + nodeCount + " " + elapsed + "ms");
