@@ -40,6 +40,21 @@ struct Node
         ++nodeCount;
     }
 
+    void dump(int indent = 0)
+    {
+        for (int i=0; i<indent; ++i) {
+            printf("  ");
+        }
+
+        printf("%d %d %d %d\n", rect.x, rect.y, rect.h, rect.w);
+
+        Node *n = firstChild;
+        while (n) {
+            n->dump(indent + 1);
+            n = n->next;
+        }
+    }
+
     int render(const Rect &clipRect);
 
     Node *firstChild, *next;
@@ -50,7 +65,9 @@ const int numbers[] = { 100, 400, 230, 120, 141, 400, 20, 1300, 450, 350 };
 int index = 0;
 inline int num()
 {
-    return numbers[index++ % sizeof(numbers) / sizeof(int)];
+    const int ret = numbers[index % (sizeof(numbers) / sizeof(int))];
+    ++index;
+    return ret;
 }
 
 int Node::render(const Rect &clip)
@@ -106,6 +123,17 @@ void generate(Node *node, int count, int depth)
 
 int main(int argc, char **argv)
 {
+    // {
+    //     Rect r(10, 10, 80, 80);
+    //     Rect r2(90, 90, 100, 100);
+    //     Rect rr;
+    //     if (r.intersects(r2, &rr)) {
+    //         printf("yes %d %d %d %d\n", rr.x, rr.y, rr.w, rr.h);
+    //     } else {
+    //         printf("no\n");
+    //     }
+    //     // return 0;
+    // }
     uint64_t start = mono();
     Node root;
     root.rect.w = 1280;
@@ -115,6 +143,7 @@ int main(int argc, char **argv)
     if (!count)
         count = 5000;
     generate(&root, 10, 4);
+    // root.dump();
     uint64_t elapsed = mono() - start;
     printf("Created %d nodes in %lldms\n", nodeCount, elapsed);
     start = mono();
